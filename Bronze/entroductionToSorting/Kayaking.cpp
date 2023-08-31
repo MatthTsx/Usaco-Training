@@ -12,18 +12,27 @@ int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(0);
     cin.tie(0);
-    int N;
+    int N, resp = INT32_MAX;
     cin >> N;
-    vector<int> vls (N*2), res (N, 0), re2 (N, 0);
-    for(int i = 0; i < N*2; i++) cin >> vls[i];
+    N *= 2;
+    vector<int> vls (N);
+    for(int i = 0; i < N; i++) cin >> vls[i];
     sort(vls.begin(), vls.end());
 
-    for(int i = 0; i < N*2; i++)
-        for(int j = i+1; j < N*2; i++){
-
-            
+    for(int i = 0; i < N; i++)
+        for(int j = i+1; j < N; j++){
+            vector<int> p;
+            for(int k = 0; k < N; k++){
+                if(k == i || k == j) continue;
+                p.push_back(vls[k]);
+            }
+            int vl = 0;
+            for(int k = 0; k < p.size() - 1; k+=2){
+                vl += p[k+1] - p[k];
+            }
+            resp = min(resp, vl);
         }
 
-    
+    cout << resp;
     return 0;
 }
