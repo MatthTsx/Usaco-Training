@@ -33,7 +33,7 @@ int main(int argc, char const *argv[])
     for(int i = 0; i < R; i++) cin >> vend[i];
 
     sort(shops.begin(), shops.end());
-    sort(vend.begin(), vend.end());
+    sort(vend.begin(), vend.end(), [](int &a, int &b){return b < a;});
     sort(cows.begin(), cows.end(), [](int &a, int &b){return b < a;});
 
     int atual_vend = 0, atual_shop = 0;
@@ -59,12 +59,12 @@ int main(int argc, char const *argv[])
 
         if(N - i <= R){
             doStuff = true;
-        }else{
-            
-        }
+        }else if (vl > vend[N-i-1]) doStuff = true;
 
         if(doStuff){
-
+            resp += vl;
+            for (auto &&i : menus) shops[i.first].qnt -= i.second;
+            
         }
     }
 
