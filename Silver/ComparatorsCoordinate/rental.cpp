@@ -64,7 +64,8 @@ int main(int argc, char const *argv[])
         if(doStuff){
             resp += vl;
             for (auto &&i : menus) shops[i.first].qnt -= i.second;
-            
+        }else{
+            resp += vend[N-i-1];
         }
     }
 
