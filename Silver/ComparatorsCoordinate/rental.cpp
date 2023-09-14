@@ -5,8 +5,8 @@ using namespace std;
 using ll = long long;
 
 struct Shop{
-    int val, qnt, total;
-    bool operator<(Shop &s){return s.val < val;};
+    int val, qnt;
+    // bool operator<(Shop &s){return s.val < val;};
 };
 
 bool reverse (int &a, int &b) { return b < a;}
@@ -28,11 +28,11 @@ int main(int argc, char const *argv[])
     for(int i = 0; i < M; i++) {
         int qnt, vl;
         cin >> qnt >> vl;
-        shops.push_back({vl, qnt, vl * qnt});
+        shops.push_back({vl, qnt});
     }
     for(int i = 0; i < R; i++) cin >> vend[i];
 
-    sort(shops.begin(), shops.end());
+    sort(shops.begin(), shops.end(), [](Shop &s, Shop &s2){return s2.val < s.val;});
     sort(vend.begin(), vend.end(), [](int &a, int &b){return b < a;});
     sort(cows.begin(), cows.end(), [](int &a, int &b){return b < a;});
 
@@ -44,7 +44,7 @@ int main(int argc, char const *argv[])
         Shop sh = shops[atual_shop];
         int cow = cows[i];
         int qnt = min(cow,sh.qnt);
-        int vl = sh.val * qnt;
+        ll vl = sh.val * qnt;
         cow -= qnt;
         menus.push_back({nwAtualShop, qnt});
 
@@ -57,36 +57,39 @@ int main(int argc, char const *argv[])
         }
         bool doStuff = false;
 
-        if(N - i <= R){
+        if(N - i >= R){
             doStuff = true;
         }else if (vl > vend[N-i-1]) doStuff = true;
 
         if(doStuff){
             resp += vl;
             for (auto &&i : menus) shops[i.first].qnt -= i.second;
+            atual_shop = nwAtualShop;
         }else{
             resp += vend[N-i-1];
         }
+        // resp += max(vl, vend[N-i-1]);
+        // cout << " {" << vl << ", " << vend[N-i-1] << "} ";
     }
 
 
     freopen("rental.out", "w", stdout);
 
-    for (auto &&i : shops)
-    {
-        cout << "{ " << i.val << ", " << i.qnt << " } ";
-    }
-    cout << endl << endl << "Vend: " << endl;
-    for (auto &&i : vend)
-    {
-        cout << "{ " << i << " } ";
-    }
-    cout << endl << endl << "vacas: " << endl;
-    for (auto &&i : cows)
-    {
-        cout << "{ " << i << " } ";
-    }
+    // for (auto &&i : shops)
+    // {
+    //     cout << "{ " << i.val << ", " << i.qnt << " } ";
+    // }
+    // cout << endl << endl << "Vend: " << endl;
+    // for (auto &&i : vend)
+    // {
+    //     cout << "{ " << i << " } ";
+    // }
+    // cout << endl << endl << "vacas: " << endl;
+    // for (auto &&i : cows)
+    // {
+    //     cout << "{ " << i << " } ";
+    // }
     
-
+    cout << resp;
     return 0;
 }
