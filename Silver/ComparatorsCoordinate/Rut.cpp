@@ -4,14 +4,17 @@
 using namespace std;
 using ll = long long;
 
+// TODO: https://usaco.guide/problems/usaco-1064-stuck-in-a-rut/solution
+
 enum Directions{
     East,
     North
 };
 
 struct Cow{
-    int x, y;
-    vector<Cow> cows_stoped;
+    int x, y, cows_stoped = 0;
+    bool isStopped = false;
+    // set<Cow> Bleme;
 };
 
 int main(int argc, char const *argv[])
@@ -26,19 +29,45 @@ int main(int argc, char const *argv[])
 
     vector<Cow> vtE;
     vector<Cow> vtN;
+    vector<Cow> vt;
 
     while(N--){
         char d;
         int x, y;
         cin >> d >> x >> y;
-        if(d == 'E') vtE.push_back({x, y});
-        else vtN.push_back({x, y});
+        Cow c = {x,y};
+        Cow & cc = c;
+        if(d == 'E') vtE.push_back(c);
+        else vtN.push_back(c);
+        vt.push_back(cc);
     }
-    sort(vtE.begin(), vtE.end(), [](Cow &c1, Cow &c2){return c1.x < c2.x;});
+    sort(vtE.begin(), vtE.end(), [](Cow &c1, Cow &c2){return c2.x < c1.x;});
     sort(vtN.begin(), vtN.end(), [](Cow &c1, Cow &c2){return c2.x < c1.x;});
 
+    for(auto&& e : vtE)
+        for (auto &&n : vtN)
+        {
+            if(n.x < e.x) continue;
+            if(n.isStopped) continue; 
+            if(n.y > e.y) continue;
+            int X = n.x - e.x, Y = e.y - n.y;
+            if( X == Y ) continue;
+            if( X > Y ){
+                n.cows_stoped += 1;
+                e.isStopped = true;
+                break;
+            }else {e.cows_stoped += 1; n.isStopped = true;};
+        }
+
     for (auto &&i : vtE)
-        cout << "{ " << i.x << ", " << i.y << " } ";
+        cout << "{ " << i.x << ", " << i.y << ", " << i.cows_stoped << " } ";
+    cout << endl << endl;
+    for (auto &&i : vtN)
+        cout << "{ " << i.x << ", " << i.y << ", " << i.cows_stoped << " } ";
+    cout << endl << endl;
+
+    for (auto &&i : vt)
+        cout << i.cows_stoped << " ";
     
 
     return 0;
