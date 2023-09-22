@@ -1,80 +1,57 @@
 #include <algorithm>
-#include <fstream>
+#include <cstdio>
 #include <iostream>
-#include <map>
+#include <set>
 #include <vector>
 
-using std::cout;
-using std::endl;
-using std::vector;
+using namespace std;
 
-struct Log
-{
-    int day, cow, change;
-};
+int main() {
+	freopen("convention2.in", "r", stdin);
+	freopen("convention2.out", "w", stdout);
 
-int main()
-{
-    std::ifstream read("measurement.in");
+	int cow_num;
+	vector<vector<int>> cows;
+	cin >> cow_num;
+	for (int c = 0; c < cow_num; c++) {
+		int start, duration;
+		cin >> start >> duration;
+		cows.push_back({c, start, duration});
+	}
 
-    int n;
-    int g;
-    read >> n >> g;
+	// sort by arrival time
+	auto cmp = [](const vector<int> &a, const vector<int> &b) {
+		return a[1] < b[1];
+	};
+	sort(cows.begin(), cows.end(), cmp);
 
-    vector<Log> log(n);
-    std::map<int, int> cows;
-    for (Log &l : log)
-    {
-        read >> l.day >> l.cow >> l.change;
-        cows[l.cow] = g;
-    }
-    std::sort(log.begin(), log.end(),
-              [](const Log &l1, const Log &l2)
-              { return l1.day < l2.day; });
+	int time = 0;
+	int curr = 0;
+	int longest_wait = 0;
 
-    std::map<int, int> milk_prod{{g, n}};
+	// sorted by priority so that the highest seniority starts eating first
+	set<vector<int>> waiting;
+	// as long as we haven't processed all cows or there are still cows waiting
+	while (curr < cow_num || !waiting.empty()) {
+		// this cow can be processed.
+		if (curr < cow_num && cows[curr][1] <= time) {
+			waiting.insert(cows[curr]);
+			curr++;
+			// no cow waiting, skip to the next cow.
+		} else if (waiting.empty()) {
+			// set time to the ending time of the next cow.
+			time = cows[curr][1] + cows[curr][2];
+			curr++;
+		} else {
+			// process the next cow
+			vector<int> next = *waiting.begin();
+			longest_wait = max(longest_wait, time - next[1]);
 
-    int changeAmt = 0;
-    for (Log l : log)
-    {
-        int milk_amt = cows[l.cow];
-        bool was_top = milk_amt == milk_prod.rbegin()->first;
-        int prev_count = milk_prod[milk_amt];
-        // remove the previous milk production number
-        milk_prod[milk_amt]--;
-        if (milk_prod[milk_amt] == 0)
-        {
-            milk_prod.erase(milk_amt);
-        }
+			// set the time to when this cow finishes
+			time += next[2];
+			waiting.erase(waiting.begin());
+		}
+	}
 
-        // update the milk production amounts
-        milk_amt += l.change;
-        cows[l.cow] = milk_amt;
-        milk_prod[milk_amt]++;
-
-        bool is_top = milk_amt == milk_prod.rbegin()->first;
-        int curr_count = milk_prod[milk_amt];
-        if (was_top)
-        {
-            if (is_top && curr_count == prev_count)
-            {
-                continue;
-            }
-            /*
-             * if it was the highest and now it's not or there are now
-             * multiple highest cows, then FJ needs to change the portrait
-             */
-            changeAmt++;
-        }
-        else if (is_top)
-        {
-            /*
-             * if it wasn't at the highest but now it is,
-             * then FJ needs to change the portrait also
-             */
-            changeAmt++;
-        }
-    }
-
-    std::ofstream("measurement.out") << changeAmt << endl;
+	cout << longest_wait << endl;
 }
