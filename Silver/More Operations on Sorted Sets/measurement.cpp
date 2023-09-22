@@ -43,7 +43,6 @@ int main()
         cows[i.id].first += i.dif;
         mts.insert(cows[i.id].first);
 
-        // cout << i.day << " " << cows[i.id].first << " " << endl;
         if (*--mts.end() != biggest)
         {
             biggest = *--mts.end();
@@ -51,11 +50,13 @@ int main()
             if (alone_id == i.id && *--mts.end() == cows[i.id].first && qnt == 1)
             {
             }
-            // cout << "sim: ";
             else
                 resp++;
-            alone_id = i.id;
-            // cout << biggest << " " << qnt << endl;
+            if (qnt != 1)
+                continue;
+            auto ff = find_if(cows.begin(), cows.end(), [biggest](const pair<int, pair<int, int>> &el)
+                              { return el.second.first == biggest; });
+            alone_id = ff->first;
             continue;
         }
         if (mts.count(biggest) != qnt)
@@ -63,7 +64,6 @@ int main()
             qnt = mts.count(biggest);
             alone_id = 0;
             resp++;
-            // cout << biggest << " " << qnt << endl;
         }
     }
     cout << resp;
