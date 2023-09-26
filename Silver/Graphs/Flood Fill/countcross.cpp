@@ -5,14 +5,15 @@ using namespace std;
 typedef pair<int,int> pii;
 
 struct Road{
-    int maxX, minX, maxY, minY;
+    int x1, x2, y1, y2;
+    bool operator<(const Road& other) const {return tie(other.x1,other.x2,other.y1,other.y2) < tie(x1,x2,y1,y2);}
 };
 
 int N, K, R;
 int pl_1, pl_2, pl_3, pl_4; // placeholders
 vector<vector<int>> grid;
 vector<vector<bool>> visited;
-vector<Road> Roads;
+set<Road> Roads;
 // vector<vector<pii>> Roads;
 vector<pii> Cows_Coords;
 
@@ -22,46 +23,45 @@ void getInputs(){
     visited = vector<vector<bool>> (N, vector<bool> (N, false));
     FOR(i,R,0){
         cin >> pl_1 >> pl_2 >> pl_3 >> pl_4;
-        pl_1--;pl_2--;pl_3--;pl_4--;
-        Roads.push_back({
-            max(pl_1,pl_3),
-            min(pl_1,pl_3),
-            max(pl_2,pl_4),
-            min(pl_2,pl_4)
-        });
+        Roads.insert({--pl_1,--pl_3,--pl_2,--pl_4});
+        Roads.insert({pl_3,pl_1,pl_4,pl_2});
     }
     FOR(i,K,0){
         cin >> pl_1 >> pl_2;
         pl_1--; pl_2--;
         Cows_Coords.push_back({pl_1,pl_2});
+        grid[pl_1][pl_2] = true;
     }
 }
 
-void floodFill(int r, int c){
-    if((r < 0 || r >= N || c < 0 || c >= N) || visited[r][c]) return;
+int floodFill(int r, int c, int prevR, int prevC){
+    if((r < 0 || r >= N || c < 0 || c >= N) || visited[r][c] || Roads.count({r,prevR,c,prevC})) return 0;
     visited[r][c] = true;
-    
-    if(find_if(Roads.begin(), Roads.end(), [&](Road& Ro){return Ro.maxX == r+1 && Ro.minX == r && Ro.maxY == c && Ro.minY == c;}) == Roads.end())
-        floodFill(r+1, c);
-    if(find_if(Roads.begin(), Roads.end(), [&](Road& Ro){return Ro.maxX == r && Ro.minX == r-1 && Ro.maxY == c && Ro.minY == c;}) == Roads.end())
-        floodFill(r-1, c);
+    int cows = grid[r][c];
 
-    if(find_if(Roads.begin(), Roads.end(), [&](Road& Ro){return Ro.maxX == r && Ro.minX == r && Ro.maxY == c+1 && Ro.minY == c;}) == Roads.end())
-        floodFill(r, c+1);
-    if(find_if(Roads.begin(), Roads.end(), [&](Road& Ro){return Ro.maxX == r && Ro.minX == r && Ro.maxY == c && Ro.minY == c-1;}) == Roads.end())
-        floodFill(r, c-1);
+    cows += floodFill(r+1, c, r, c);
+    cows += floodFill(r-1, c, r, c);
+    cows += floodFill(r, c+1, r, c);
+    cows += floodFill(r, c-1, r, c);
+
+    return cows;
 }
 
 void solve(){
     getInputs();
 
+    vector<int> pairs;
     int resp = 0;
     for (auto &&i : Cows_Coords)
     {
         if(visited[i.first][i.second]) continue;
-        floodFill(i.first, i.second);
-        resp++;
+        int ff = floodFill(i.first, i.second, i.first, i.second);
+        if(ff != 0) pairs.push_back(ff);
     }
+    
+    FOR(i, pairs.size(), 0)
+        FOR(j, pairs.size(), i+1)
+            resp += pairs[i] * pairs[j];
     cout << resp;
 }
 
